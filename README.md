@@ -27,12 +27,12 @@ break up       打碎；分裂；解散（组织、集会）；（关系）破�
 
 同一个工具，两种打包方式，**功能完全一样、词库都是 2214 条**：
 
-| | **单文件版**（推荐） | **模块版** |
-|---|---|---|
-| 在哪 | 根目录 `index.html` | `modular/` 整个文件夹 |
-| 怎么拿 | **只下载这一个文件** | 把 `modular/` 整个文件夹拿走 |
-| 适合 | 只想马上开始背 | 想自己增删词条 |
-| 词库 | 内嵌在 html 内部 | 独立在 `modular/data/phrases.js` |
+|     | **单文件版**（推荐）     | **模块版**                       |
+| --- | ---------------- | ----------------------------- |
+| 在哪  | 根目录 `index.html` | `modular/` 整个文件夹              |
+| 怎么拿 | **只下载这一个文件**     | 把 `modular/` 整个文件夹拿走          |
+| 适合  | 只想马上开始背          | 想自己增删词条                       |
+| 词库  | 内嵌在 html 内部      | 独立在 `modular/data/phrases.js` |
 
 > 不确定选哪个？**选单文件版** —— 下载一个文件、双击，结束。
 
@@ -53,21 +53,7 @@ cd kaoyan-flashcards/modular
 
 然后**双击** `index.html` 即可。
 
-> ⚠️ **模块版必须让** `index.html` **和** `data/` **目录待在一起**，单独把 `index.html` 发给别人是打不开词库的。
-
-## 目录结构
-
-```
-kaoyan-flashcards/
-├── index.html              # 单文件版：词库内嵌，下载这一个就能用
-├── modular/                # 模块版：词库独立，方便自行更新
-│   ├── index.html          # 工具本体（页面 + 逻辑）
-│   └── data/
-│       ├── phrases.js      # 词库（2214 条，程序加载用）
-│       └── phrases.txt     # 同一份词库的纯文本版（英文<TAB>中文，便于导入其他工具）
-├── LICENSE
-└── README.md
-```
+> ⚠️ **模块版必须把** `index.html` **和** `data/` **目录放在一起**，单独把 `index.html` 发给别人是打不开词库的。
 
 ## 词库格式
 
@@ -118,11 +104,11 @@ abide by	遵守；信守（承诺、规则等）
 
 **Two builds, pick one** (same features, same 2214 phrases):
 
-| | Single-file | Modular |
-|---|---|---|
-| Where | root `index.html` | the `modular/` folder |
-| How | download that one file | take the whole `modular/` folder |
-| Phrase bank | embedded in the html | separate `modular/data/phrases.js` |
+|             | Single-file            | Modular                            |
+| ----------- | ---------------------- | ---------------------------------- |
+| Where       | root `index.html`      | the `modular/` folder              |
+| How         | download that one file | take the whole `modular/` folder   |
+| Phrase bank | embedded in the html   | separate `modular/data/phrases.js` |
 
 **Usage**: download the root `index.html` and open it — that's it. For the modular build, open `modular/index.html` and keep it next to the `data/` folder.
 
