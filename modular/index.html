@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>词组抽背助手</title>
+    <style>
+        /* ========== 全部 CSS 样式 ========== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f7f9fc;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        h1 { font-size: 2.4rem; font-weight: 600; color: #1a2634; margin-bottom: 8px; }
+        .total { font-size: 1rem; color: #6b7a8a; margin-bottom: 30px; }
+        .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 10px; }
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            background-color: #e9ecef;
+            color: #333;
+            flex: 1 0 auto;
+            min-width: 160px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.10); }
+        .btn:active { transform: scale(0.97); }
+        .primary { background-color: #4a6cf7; color: white; }
+        .primary:hover { background-color: #3a5cd9; }
+        .secondary { background-color: #28a745; color: white; }
+        .secondary:hover { background-color: #218838; }
+        .danger { background-color: #dc3545; color: white; }
+        .danger:hover { background-color: #c82333; }
+        .status { margin-top: 20px; font-size: 0.95rem; color: #6b7a8a; }
+
+        /* 抽背页面样式 */
+        .review-container { padding: 20px 20px 35px; }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            color: #495057;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            margin-bottom: 30px;
+        }
+        .home-link {
+            color: #4a6cf7;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .home-link:hover { text-decoration: underline; }
+        .review-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+        .phrase-display {
+            font-size: 2.4rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            padding: 20px 10px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            color: #1a2634;
+            word-break: break-word;
+        }
+        .answer-display {
+            font-size: 1.6rem;
+            color: #2c7a4d;
+            background: #f0f9f4;
+            padding: 18px 25px;
+            border-radius: 16px;
+            width: 100%;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .action-buttons .btn { flex: 0 1 auto; min-width: 120px; }
+        .remember { background-color: #28a745; color: white; }
+        .remember:hover { background-color: #218838; }
+        .forget { background-color: #fd7e14; color: white; }
+        .forget:hover { background-color: #e06b0a; }
+        .next { background-color: #6c757d; color: white; }
+        .next:hover { background-color: #5a6268; }
+
+        /* 新增的确认按钮 */
+        .confirm-correct { background-color: #28a745; color: white; }
+        .confirm-correct:hover { background-color: #218838; }
+        .confirm-wrong { background-color: #dc3545; color: white; }
+        .confirm-wrong:hover { background-color: #c82333; }
+
+        .hidden { display: none; }
+
+        @media (max-width: 480px) {
+            .container { padding: 25px 16px; }
+            h1 { font-size: 1.8rem; }
+            .phrase-display { font-size: 1.8rem; min-height: 70px; }
+            .answer-display { font-size: 1.2rem; min-height: 60px; }
+            .btn { font-size: 0.95rem; padding: 12px 20px; min-width: 100px; }
+            .status-bar { flex-direction: column; gap: 6px; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <!-- ====== 首页视图 ====== -->
+        <div id="homeView">
+            <h1>📚 词组抽背助手</h1>
+            <p class="total">共 <span id="totalCount">2506</span> 个词组</p>
+            <div class="actions">
+                <button id="startBtn" class="btn primary">开始背诵</button>
+                <button id="continueBtn" class="btn secondary hidden">继续上次进度</button>
+                <button id="clearBtn" class="btn danger">清除所有数据</button>
+            </div>
+            <p id="statusMsg" class="status"></p>
+        </div>
+
+        <!-- ====== 抽背视图（初始隐藏） ====== -->
+        <div id="reviewView" class="review-container hidden">
+            <header class="status-bar">
+                <span>已背词组：<strong id="masteredCount">0</strong> / <span id="totalCount2">2506</span></span>
+                <span class="home-link" id="backHomeBtn">← 返回首页</span>
+            </header>
+            <div class="review-area">
+                <div id="phraseDisplay" class="phrase-display"></div>
+                <div id="answerDisplay" class="answer-display hidden"></div>
+                <div class="action-buttons">
+                    <!-- 第一层按钮：记得 / 不记得 -->
+                    <button id="rememberBtn" class="btn remember">记得</button>
+                    <button id="forgetBtn" class="btn forget">不记得</button>
+                    <!-- 第二层按钮：答对了 / 记错了（初始隐藏） -->
+                    <button id="confirmCorrectBtn" class="btn confirm-correct hidden">答对了💐</button>
+                    <button id="confirmWrongBtn" class="btn confirm-wrong hidden">记错了🙈</button>
+                    <!-- 下一个词组按钮 -->
+                    <button id="nextBtn" class="btn next hidden">下一个词组 →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data/phrases.js"></script>
+    <script>
+function showHomeView() {
+    homeView.style.display = 'block';
+    reviewView.style.display = 'none';
+    const masteredCount = progress.masteredIds ? progress.masteredIds.length : 0;
+    if (masteredCount > 0) {
+        continueBtn.classList.remove('hidden');
+        statusMsg.textContent = `上次学习进度：已背 ${masteredCount} / ${TOTAL_PHRASES} 个词组`;
+    } else {
+        continueBtn.classList.add('hidden');
+        statusMsg.textContent = '开始你的背诵之旅吧！';
+    }
+}
+
+function showReviewView() {
+    homeView.style.display = 'none';
+    reviewView.style.display = 'block';
+    progress = getProgress();
+    updateMasteredDisplay();
+    showNextPhrase();
+}
+        // =====================================================
+        // 1. 词组数据
+        // =====================================================
+        // 数据文件：data/phrases.js
+        // 必须与本文件放在一起：页面通过下面的 <script src> 加载它
+        // =====================================================
+        const BUILT_IN_PHRASES = window.KAOYAN_PHRASES || [];
+        const TOTAL_PHRASES = BUILT_IN_PHRASES.length;
+
+        // 词库没加载时给出明确提示。最常见的误操作是：只把 index.html 拿走，
+        // 没带上 data/ 目录 —— 那样页面会显示 0 个词组却不报错，很容易懵。
+        if (TOTAL_PHRASES === 0) {
+            const warnMissingData = () => {
+                if (document.getElementById('dataMissingWarning')) return;
+                const box = document.createElement('div');
+                box.id = 'dataMissingWarning';
+                box.textContent = '⚠️ 词库没能加载：请确认 data/phrases.js 与本文件在同一个文件夹里。';
+                box.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99999;background:#c62828;' +
+                    'color:#fff;padding:12px;text-align:center;font-size:14px;line-height:1.5;';
+                document.body.prepend(box);
+            };
+            if (document.body) warnMissingData();
+            else document.addEventListener('DOMContentLoaded', warnMissingData);
+        }
+
+        // =====================================================
+        // 3. localStorage 操作
+        // =====================================================
+        const STORAGE_PREFIX = 'phraseBookApp_';
+        const STORAGE_KEY = STORAGE_PREFIX + 'progress';
+
+        function loadProgress() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try { return JSON.parse(stored); } catch(e) { return null; }
+            }
+            return null;
+        }
+
+        function saveProgress(progress) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+
+        function initProgress() {
+            const progress = {
+                masteredIds: [],
+                difficultPhrases: [],
+                phraseHistory: []
+            };
+            saveProgress(progress);
+            return progress;
+        }
+
+        function getProgress() {
+            let progress = loadProgress();
+            if (!progress) progress = initProgress();
+            return progress;
+        }
+
+        // =====================================================
+        // 4. 加权随机选择
+        // =====================================================
+        function selectNextPhrase(progress) {
+            let available = BUILT_IN_PHRASES.slice();
+            const history = progress.phraseHistory || [];
+            if (history.length > 0) {
+                available = available.filter(p => !history.includes(p.id));
+            }
+            if (available.length === 0) {
+                progress.phraseHistory = [];
+                saveProgress(progress);
+                available = BUILT_IN_PHRASES.slice();
+            }
+
+            let totalWeight = 0;
+            for (const p of available) {
+                let w = p.weight;
+                if (progress.difficultPhrases.includes(p.id)) {
+                    w = Math.max(1.0, w + 0.5);
+                }
+                totalWeight += w;
+            }
+
+            let random = Math.random() * totalWeight;
+            for (const p of available) {
+                let w = p.weight;
+                if (progress.difficultPhrases.includes(p.id)) {
+                    w = Math.max(1.0, w + 0.5);
+                }
+                random -= w;
+                if (random <= 0) return p;
+            }
+            return available[0];
+        }
+
+        // =====================================================
+        // 5. 页面切换与逻辑
+        // =====================================================
+        let progress, currentPhrase;
+        const homeView = document.getElementById('homeView');
+        const reviewView = document.getElementById('reviewView');
+        const totalSpan = document.getElementById('totalCount');
+        const totalSpan2 = document.getElementById('totalCount2');
+        const startBtn = document.getElementById('startBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        const masteredSpan = document.getElementById('masteredCount');
+        const phraseDisplay = document.getElementById('phraseDisplay');
+        const answerDisplay = document.getElementById('answerDisplay');
+        const rememberBtn = document.getElementById('rememberBtn');
+        const forgetBtn = document.getElementById('forgetBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const backHomeBtn = document.getElementById('backHomeBtn');
+        // 新增的二次确认按钮
+        const confirmCorrectBtn = document.getElementById('confirmCorrectBtn');
+        const confirmWrongBtn = document.getElementById('confirmWrongBtn');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            if (totalSpan) totalSpan.textContent = TOTAL_PHRASES;
+            if (totalSpan2) totalSpan2.textContent = TOTAL_PHRASES;
+
+            progress = getProgress();
+            const masteredCount = progress.masteredIds ? progress.masteredIds.length : 0;
+
+            if (masteredCount > 0) {
+                continueBtn.classList.remove('hidden');
+                statusMsg.textContent = `上次学习进度：已背 ${masteredCount} / ${TOTAL_PHRASES} 个词组`;
+            } else {
+                continueBtn.classList.add('hidden');
+                statusMsg.textContent = '开始你的背诵之旅吧！';
+            }
+
+            startBtn.addEventListener('click', showReviewView);
+            continueBtn.addEventListener('click', showReviewView);
+            clearBtn.addEventListener('click', function() {
+                if (confirm('确定要清除所有学习数据吗？此操作不可恢复！')) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    progress = initProgress();
+                    location.reload();
+                }
+            });
+            backHomeBtn.addEventListener('click', showHomeView);
+
+            // 绑定新按钮事件
+            rememberBtn.addEventListener('click', handleRemember);
+            forgetBtn.addEventListener('click', handleForget);
+            confirmCorrectBtn.addEventListener('click', handleConfirmCorrect);
+            confirmWrongBtn.addEventListener('click', handleConfirmWrong);
+            nextBtn.addEventListener('click', handleNext);
+        });
+
+        function showHomeView() {
+            homeView.classList.remove('hidden');
+            reviewView.classList.add('hidden');
+            const masteredCount = progress.masteredIds ? progress.masteredIds.length : 0;
+            if (masteredCount > 0) {
+                continueBtn.classList.remove('hidden');
+                statusMsg.textContent = `上次学习进度：已背 ${masteredCount} / ${TOTAL_PHRASES} 个词组`;
+            } else {
+                continueBtn.classList.add('hidden');
+                statusMsg.textContent = '开始你的背诵之旅吧！';
+            }
+        }
+
+        function showReviewView() {
+            homeView.classList.add('hidden');
+            reviewView.classList.remove('hidden');
+            progress = getProgress();
+            updateMasteredDisplay();
+            showNextPhrase();
+        }
+
+        function updateMasteredDisplay() {
+            const count = progress.masteredIds ? progress.masteredIds.length : 0;
+            if (masteredSpan) masteredSpan.textContent = count;
+        }
+
+        function showNextPhrase() {
+            currentPhrase = selectNextPhrase(progress);
+            if (!currentPhrase) {
+                phraseDisplay.textContent = '🎉 恭喜！你已掌握所有词组！';
+                answerDisplay.classList.add('hidden');
+                rememberBtn.classList.add('hidden');
+                forgetBtn.classList.add('hidden');
+                confirmCorrectBtn.classList.add('hidden');
+                confirmWrongBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                return;
+            }
+            phraseDisplay.textContent = currentPhrase.english;
+            answerDisplay.classList.add('hidden');
+            rememberBtn.classList.remove('hidden');
+            forgetBtn.classList.remove('hidden');
+            confirmCorrectBtn.classList.add('hidden');
+            confirmWrongBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+        }
+
+        // 点击“记得” → 显示答案 + 二次确认按钮
+        function handleRemember() {
+            if (!currentPhrase) return;
+            // 显示中文释义
+            answerDisplay.textContent = currentPhrase.chinese;
+            answerDisplay.classList.remove('hidden');
+            // 隐藏“记得/不记得”，显示二次确认按钮
+            rememberBtn.classList.add('hidden');
+            forgetBtn.classList.add('hidden');
+            confirmCorrectBtn.classList.remove('hidden');
+            confirmWrongBtn.classList.remove('hidden');
+            nextBtn.classList.add('hidden'); // 暂不显示下一个
+        }
+
+        // 点击“答对了💐”
+        function handleConfirmCorrect() {
+            if (!currentPhrase) return;
+            const id = currentPhrase.id;
+            // 增加已背
+            if (!progress.masteredIds.includes(id)) {
+                progress.masteredIds.push(id);
+                // 从难词移除
+                const idx = progress.difficultPhrases.indexOf(id);
+                if (idx !== -1) progress.difficultPhrases.splice(idx, 1);
+                currentPhrase.weight = 1.0;
+                saveProgress(progress);
+                updateMasteredDisplay();
+            }
+            // 隐藏二次确认，显示“下一个”
+            confirmCorrectBtn.classList.add('hidden');
+            confirmWrongBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        // 点击“记错了🙈”
+        function handleConfirmWrong() {
+            if (!currentPhrase) return;
+            const id = currentPhrase.id;
+            // 从已背中移除（如果有）
+            const idx = progress.masteredIds.indexOf(id);
+            if (idx !== -1) progress.masteredIds.splice(idx, 1);
+            // 加入难词
+            if (!progress.difficultPhrases.includes(id)) {
+                progress.difficultPhrases.push(id);
+            }
+            currentPhrase.weight = Math.min((currentPhrase.weight || 1.0) + 0.5, 5.0);
+            saveProgress(progress);
+            updateMasteredDisplay();
+            // 隐藏二次确认，显示“下一个”
+            confirmCorrectBtn.classList.add('hidden');
+            confirmWrongBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        // 点击“不记得” → 直接执行原逻辑，显示下一个
+        function handleForget() {
+            if (!currentPhrase) return;
+            const id = currentPhrase.id;
+            const idx = progress.masteredIds.indexOf(id);
+            if (idx !== -1) progress.masteredIds.splice(idx, 1);
+            if (!progress.difficultPhrases.includes(id)) {
+                progress.difficultPhrases.push(id);
+            }
+            currentPhrase.weight = Math.min((currentPhrase.weight || 1.0) + 0.5, 5.0);
+            saveProgress(progress);
+            updateMasteredDisplay();
+            // 显示答案和“下一个”
+            answerDisplay.textContent = currentPhrase.chinese;
+            answerDisplay.classList.remove('hidden');
+            rememberBtn.classList.add('hidden');
+            forgetBtn.classList.add('hidden');
+            confirmCorrectBtn.classList.add('hidden');
+            confirmWrongBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        // 下一个词组
+        function handleNext() {
+            if (!currentPhrase) return;
+            if (!progress.phraseHistory) progress.phraseHistory = [];
+            progress.phraseHistory.push(currentPhrase.id);
+            if (progress.phraseHistory.length > 10) progress.phraseHistory.shift();
+            saveProgress(progress);
+            showNextPhrase();
+        }
+    </script>
+</body>
+</html>
