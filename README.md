@@ -23,9 +23,9 @@ break out      （战争、火灾、疾病等）爆发；逃脱；突然发生
 break up       打碎；分裂；解散（组织、集会）；（关系）破裂；分手；破碎
 ```
 
-## 两个版本，挑一个
+## 两个版本
 
-同一个工具，两种打包方式，**功能完全一样、词库都是 2214 条**：
+同一个工具，两种打包方式：
 
 |     | **单文件版**（推荐）     | **模块版**                       |
 | --- | ---------------- | ----------------------------- |
@@ -102,7 +102,7 @@ abide by	遵守；信守（承诺、规则等）
 - Single-page, fully offline: just open `index.html` in a browser
 - The phrase bank lives in `modular/data/phrases.js` and can be reused in other tools (Anki, custom apps, etc.)
 
-**Two builds, pick one** (same features, same 2214 phrases):
+**Two builds**:
 
 |             | Single-file            | Modular                            |
 | ----------- | ---------------------- | ---------------------------------- |
